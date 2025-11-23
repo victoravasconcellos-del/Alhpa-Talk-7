@@ -12,7 +12,7 @@ import { AppView, UserStats } from './types';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { getUserProfile, updateUserStats, INITIAL_STATS, createUserProfile, incrementUsage } from './services/userService';
 import { isSupabaseConfigured } from './lib/supabase';
-import { Settings, Database, Copy, Crown } from 'lucide-react';
+import { Settings, Database, Crown } from 'lucide-react';
 
 const SetupRequired: React.FC = () => (
   <div className="min-h-screen bg-black flex flex-col items-center justify-center p-8 text-center">
@@ -98,7 +98,8 @@ FOR EACH ROW EXECUTE PROCEDURE public.protect_premium_status();`;
                         className="absolute top-2 right-2 bg-zinc-800 p-2 rounded-md text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-zinc-700"
                         title="Copiar SQL"
                     >
-                        <Copy size={14} />
+                        {/* Copy icon removed for simplicity or use Lucide Copy */}
+                        Copiar
                     </button>
                 </div>
                 <p className="text-xs text-zinc-600 mt-4 text-center">
@@ -384,4 +385,3 @@ const App: React.FC = () => {
 };
 
 export default App;
-
