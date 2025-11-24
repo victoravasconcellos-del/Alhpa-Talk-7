@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Check, Star, ExternalLink, Crown, ShieldCheck, Zap, Calendar, Tag, ArrowRight, Gift, X, Loader2, Fingerprint, LifeBuoy } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -177,7 +178,7 @@ const Premium: React.FC<PremiumProps> = ({ isPremium = false }) => {
                   <div className="space-y-4">
                       <input 
                           type="text" 
-                          placeholder="Ex: C7yp81"
+                          placeholder="Digite seu código"
                           value={redeemCode}
                           onChange={(e) => setRedeemCode(e.target.value.toUpperCase())}
                           className="w-full bg-black border border-zinc-700 rounded-xl py-3 px-4 text-center text-white font-mono uppercase tracking-widest placeholder:text-zinc-700 focus:border-alpha-gold outline-none"
