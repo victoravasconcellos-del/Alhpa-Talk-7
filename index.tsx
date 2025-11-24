@@ -1,15 +1,131 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import App from './Main'; // MUDANÇA AQUI: Agora importa './Main'
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    
+    <!-- PWA / Mobile Capabilities -->
+    <title>AlphaTalk - Domine a Arte da Conquista</title>
+    <meta name="description" content="O assistente de IA para decodificar mensagens, criar respostas perfeitas e melhorar suas habilidades sociais.">
+    
+    <!-- Android / Chrome -->
+    <meta name="theme-color" content="#000000">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="AlphaTalk">
+    <link rel="manifest" href="/manifest.json">
 
-const rootElement = document.getElementById('root');
-if (!rootElement) {
-  throw new Error("Could not find root element to mount to");
+    <!-- iOS / Safari -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="AlphaTalk">
+    
+    <!-- iOS Icons -->
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3062/3062634.png">
+    <link rel="apple-touch-startup-image" href="https://cdn-icons-png.flaticon.com/512/3062/3062634.png">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              alpha: {
+                gold: '#F59E0B',
+                light: '#FCD34D',
+                dark: '#000000',
+                card: '#09090b',
+                border: '#27272a',
+                text: '#fafafa',
+                muted: '#a1a1aa',
+              }
+            },
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+            },
+            backgroundImage: {
+              'gradient-gold': 'linear-gradient(135deg, #F59E0B 0%, #B45309 100%)',
+              'gradient-dark': 'linear-gradient(to bottom, #18181b 0%, #000000 100%)',
+              'glow': 'radial-gradient(circle at center, rgba(245, 158, 11, 0.15) 0%, transparent 70%)',
+            },
+            animation: {
+              'scan': 'scan 2s linear infinite',
+              'shimmer': 'shimmer 2s linear infinite',
+              'slide-up': 'slideUp 0.5s ease-out forwards',
+            },
+            keyframes: {
+              scan: {
+                '0%': { transform: 'translateY(-100%)', opacity: '0' },
+                '50%': { opacity: '1' },
+                '100%': { transform: 'translateY(100%)', opacity: '0' },
+              },
+              shimmer: {
+                '0%': { transform: 'translateX(-100%)' },
+                '100%': { transform: 'translateX(100%)' },
+              },
+              slideUp: {
+                '0%': { transform: 'translateY(20px)', opacity: '0' },
+                '100%': { transform: 'translateY(0)', opacity: '1' },
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: #000000;
+        color: #fafafa;
+        -webkit-tap-highlight-color: transparent;
+        overscroll-behavior-y: none;
+      }
+      ::-webkit-scrollbar { width: 4px; }
+      ::-webkit-scrollbar-track { background: #000; }
+      ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 2px; }
+      ::-webkit-scrollbar-thumb:hover { background: #F59E0B; }
+      
+      .glass {
+        background: rgba(9, 9, 11, 0.85);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      .glass-card {
+        background: linear-gradient(180deg, rgba(24, 24, 27, 0.6) 0%, rgba(9, 9, 11, 0.9) 100%);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(10px);
+      }
+      .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.554.0",
+    "react-markdown": "https://aistudiocdn.com/react-markdown@^10.1.0",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "vite": "https://aistudiocdn.com/vite@^7.2.4",
+    "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.1.1",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "@supabase/supabase-js": "https://aistudiocdn.com/@supabase/supabase-js@^2.84.0"
+  }
 }
-
-const root = ReactDOM.createRoot(rootElement);
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+</script>
+</head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="./index.tsx"></script>
+    
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('data:application/javascript;base64,c2VsZi5hZGRFdmVudExpc3RlbmVyKCdTZXR1cCcsIChldmVudCkgPT4geyBldmVudC53YWl0VW50aWwoc2VsZi5za2lwV2FpdGluZygpKTsgfSk7c2VsZi5hZGRFdmVudExpc3RlbmVyKCdTZXR1cCcsIChldmVudCkgPT4geyBldmVudC53YWl0VW50aWwoc2VsZi5jbGllbnRzLmNsYWltKCkpOyB9KTs=').catch(() => {});
+        });
+      }
+    </script>
+  </body>
+</html>
