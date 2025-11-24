@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Navigation from './components/Navigation';
@@ -11,6 +12,7 @@ import ProfileSettings from './components/ProfileSettings';
 import Onboarding from './components/Onboarding';
 import LandingPage from './components/LandingPage';
 import Quiz from './components/Quiz';
+import InstallPrompt from './components/InstallPrompt';
 import { AppView, UserStats } from './types';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { getUserProfile, updateUserStats, INITIAL_STATS, createUserProfile, incrementUsage } from './services/userService';
@@ -149,6 +151,7 @@ const App: React.FC = () => {
   return (
     <AuthProvider>
         <Router>
+            <InstallPrompt />
             <Routes>
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/quiz" element={<Quiz />} />
