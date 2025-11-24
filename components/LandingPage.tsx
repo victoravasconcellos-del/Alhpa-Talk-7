@@ -13,8 +13,8 @@ const LandingPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-black text-white font-sans overflow-x-hidden selection:bg-alpha-gold selection:text-black pb-10">
       
-      {/* Navbar Simple */}
-      <nav className="fixed top-0 w-full z-50 bg-black/80 backdrop-blur-md border-b border-white/5 transition-all">
+      {/* Navbar Simple - Adicionado pt-safe para evitar corte no iPhone */}
+      <nav className="fixed top-0 w-full z-50 bg-black/80 backdrop-blur-md border-b border-white/5 transition-all pt-safe">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
             <div className="flex items-center gap-2">
                 <div className="w-8 h-8 bg-gradient-to-br from-alpha-gold to-yellow-600 rounded-lg flex items-center justify-center shadow-lg shadow-alpha-gold/20">
