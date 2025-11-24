@@ -4,16 +4,11 @@ import { MessageAnalysis, CoachingRequest, DailyQuest } from '../types';
 
 const getLocalAiClient = () => {
   const apiKey = process.env.API_KEY;
-  if (!apiKey) {
-    throw new Error("API_KEY not configured");
-  }
+  if (!apiKey) return new GoogleGenAI({ apiKey: 'dummy' }); // Fallback to avoid crash
   return new GoogleGenAI({ apiKey });
 };
 
-const SYSTEM_INSTRUCTION = `
-Você é o AlphaBot, um coach de relacionamentos e carisma.
-Seja conciso e prático.
-`;
+const SYSTEM_INSTRUCTION = "Você é o AlphaBot, um coach de relacionamentos.";
 
 export const analyzeScreenshot = async (base64Image: string): Promise<MessageAnalysis> => {
   try {
@@ -21,10 +16,7 @@ export const analyzeScreenshot = async (base64Image: string): Promise<MessageAna
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
       contents: {
-        parts: [
-          { inlineData: { mimeType: 'image/png', data: base64Image } },
-          { text: "Analise este print." }
-        ]
+        parts: [{ inlineData: { mimeType: 'image/png', data: base64Image } }, { text: "Analise este print." }]
       },
       config: {
         systemInstruction: SYSTEM_INSTRUCTION,
@@ -40,10 +32,9 @@ export const analyzeScreenshot = async (base64Image: string): Promise<MessageAna
         }
       }
     });
-
     if (response.text) return JSON.parse(response.text) as MessageAnalysis;
     throw new Error("EMPTY");
-  } catch (error: any) {
+  } catch (error) {
     throw new Error("Erro na análise.");
   }
 };
@@ -53,7 +44,7 @@ export const getCoachingAdvice = async (request: CoachingRequest): Promise<strin
     const ai = getLocalAiClient();
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
-      contents: `Ajude com esta mensagem: "${request.text}". Objetivo: ${request.goal}`,
+      contents: `Ajuda: ${request.text} Objetivo: ${request.goal}`,
       config: { systemInstruction: SYSTEM_INSTRUCTION }
     });
     return response.text || "Erro.";
@@ -64,8 +55,8 @@ export const getCoachingAdvice = async (request: CoachingRequest): Promise<strin
 
 export const getDailyQuests = async (): Promise<DailyQuest[]> => {
   return [
-      { id: '1', title: 'Acesse a Biblioteca', xpReward: 20, difficulty: 'EASY', completed: false },
-      { id: '2', title: 'Use o Scanner', xpReward: 50, difficulty: 'MEDIUM', completed: false },
-      { id: '3', title: 'Use o Coach', xpReward: 100, difficulty: 'HARD', completed: false }
+      { id: '1', title: 'Use o Scanner IA', xpReward: 50, difficulty: 'EASY', completed: false },
+      { id: '2', title: 'Acesse a Biblioteca', xpReward: 20, difficulty: 'EASY', completed: false },
+      { id: '3', title: 'Use o Coach', xpReward: 50, difficulty: 'MEDIUM', completed: false }
   ];
 }
