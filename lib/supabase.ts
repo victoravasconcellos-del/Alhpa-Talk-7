@@ -24,3 +24,4 @@ export const supabase = createClient(
 export const isSupabaseConfigured = () => {
     return !!supabaseUrl && supabaseUrl.startsWith('http') && !!supabaseAnonKey;
 };
+
