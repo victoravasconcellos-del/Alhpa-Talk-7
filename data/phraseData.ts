@@ -17,27 +17,7 @@ export const categories = [
       "Você tem cara de quem aprontava muito na época da escola.",
       "Seu gosto musical parece ser impecável, me indica uma música pra hoje?",
       "Achei seu perfil muito intrigante, não consegui passar direto.",
-      "Você parece ser alguém que sabe onde encontrar o melhor café da cidade.",
-      "Vim aqui reclamar que você roubou toda a beleza do meu feed hoje.",
-      "Se eu te chamasse pra sair agora, qual seria sua desculpa esfarrapada?",
-      "Tô escrevendo um livro sobre pessoas interessantes, posso te entrevistar?",
-      "Minha mãe mandou perguntar se você aceita um genro/nora.",
-      "Prometo que não sou um sequestrador, só achei você interessante.",
-      "Você acredita em amor à primeira vista ou devo passar aqui de novo?",
-      "Avaliação do perfil: 10/10. O que eu ganho por ser o jurado?",
-      "Oi, sou o futuro ex-marido que você vai contar pras amigas.",
-      "Essa blusa combinou muito com seus olhos, foi de propósito?",
-      "Estou aceitando currículos para o cargo de 'minha crush', interessada?",
-      "Vou ser direto: achei você linda e queria te conhecer.",
-      "Não costumo fazer isso, mas sua vibe me chamou muita atenção.",
-      "Oi, prazer. Achei que deveríamos conversar.",
-      "Temos muito em comum, seria um desperdício não nos falarmos.",
-      "Você tem um sorriso que ilumina o dia, precisava te dizer isso.",
-      "Olhei suas fotos e pensei: 'preciso saber se ela é tão legal quanto parece'.",
-      "Qual é a história por trás dessa tatuagem? Parece interessante.",
-      "Não vou usar frases feitas, só queria dizer oi.",
-      "Você parece ser o tipo de problema que eu gosto.",
-      "Se sua personalidade for tão bonita quanto seu rosto, estou ferrado."
+      "Você parece ser alguém que sabe onde encontrar o melhor café da cidade."
     ]
   },
   { 
@@ -56,22 +36,7 @@ export const categories = [
       "Qual a característica que você mais valoriza em uma amizade?",
       "Você se considera uma pessoa espiritualizada?",
       "O que faz você perder a noção do tempo?",
-      "Qual o melhor conselho que já te deram?",
-      "Você prefere viajar para o futuro ou para o passado?",
-      "Você prefere ser invisível ou ler mentes?",
-      "Você prefere viver no mar ou no espaço?",
-      "Você prefere saber a data da sua morte ou a causa?",
-      "Você prefere ter dinheiro infinito ou amor verdadeiro garantido?",
-      "Você prefere falar todas as línguas ou falar com animais?",
-      "Você prefere ser famoso ou rico anonimamente?",
-      "Você prefere nunca mais usar internet ou nunca mais viajar?",
-      "Você prefere sempre dizer a verdade ou sempre mentir?",
-      "Você prefere perder o olfato ou o paladar?",
-      "Me conta a história mais engraçada da sua infância.",
-      "Qual foi o momento mais vergonhoso da sua vida (prometo não rir)?",
-      "Qual a viagem mais desastrosa que você já fez?",
-      "Qual foi o melhor presente que você já recebeu?",
-      "Qual a maior loucura que você já fez por amor?"
+      "Qual o melhor conselho que já te deram?"
     ]
   },
   { 
@@ -90,17 +55,7 @@ export const categories = [
       "Bora sair da toca esse fim de semana?",
       "Tem um filme novo que parece bom. Vamos ver?",
       "Me ajuda a escolher um presente pra minha irmã no shopping?",
-      "Vamos dar uma volta no parque e ver os cachorros?",
-      "Você prefere jantar fora na terça ou na quinta?",
-      "Vamos no japonês ou no italiano?",
-      "Sábado à noite ou domingo à tarde?",
-      "Cinema ou barzinho?",
-      "Café às 16h ou Drinks às 20h?",
-      "Você é mais de parque ou de museu?",
-      "Hambúrguer ou Pizza? O perdedor paga a conta.",
-      "Cerveja gelada ou vinho tinto?",
-      "Boliche ou Bilhar?",
-      "Praia ou cachoeira no sábado?"
+      "Vamos dar uma volta no parque e ver os cachorros?"
     ]
   },
   { 
@@ -119,17 +74,7 @@ export const categories = [
       "Você cozinha bem? Porque beleza não põe mesa.",
       "Você é fofa, mas tem cara de quem morde.",
       "Até que você não é chata.",
-      "Você tem sorte de ser bonita.",
-      "Duvido que você beije tão bem quanto fala.",
-      "Você não aguentaria 5 minutos comigo.",
-      "Aposto que eu ganho de você em qualquer jogo.",
-      "Você é sempre assim ou tá tentando me impressionar?",
-      "Cuidado pra não se apaixonar, sou um problema.",
-      "Você tá flertando comigo ou é impressão minha?",
-      "Acho que você não tem coragem de sair comigo.",
-      "Você fala muito, quero ver na prática.",
-      "Não me olha assim que eu não me responsabilizo.",
-      "Você é má influência, gostei."
+      "Você tem sorte de ser bonita."
     ]
   },
 ];
