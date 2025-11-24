@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Download, X, Share, PlusSquare } from 'lucide-react';
 
@@ -35,7 +34,7 @@ const InstallPrompt: React.FC = () => {
             // Check if user has dismissed it before in this session
             const hasDismissed = sessionStorage.getItem('installPromptDismissed');
             if (!hasDismissed) {
-                const timer = setTimeout(() => setIsVisible(true), 3000); // 3s delay
+                const timer = setTimeout(() => setIsVisible(true), 1000); // 1s delay (Reduced from 3000ms)
                 return () => clearTimeout(timer);
             }
         }
