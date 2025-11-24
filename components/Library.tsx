@@ -34,10 +34,10 @@ const Library: React.FC<LibraryProps> = ({ isPremium, onUpgrade }) => {
       </header>
 
       <div className="grid grid-cols-1 gap-4">
-        {categories.map((cat) => {
+        {categories.map((cat: any) => {
             const searchTerm = searchTerms[cat.id] || '';
             const allLines = cat.lines;
-            const filteredLines = allLines.filter(line => 
+            const filteredLines = allLines.filter((line: string) => 
                 line.toLowerCase().includes(searchTerm.toLowerCase())
             );
             
@@ -90,7 +90,7 @@ const Library: React.FC<LibraryProps> = ({ isPremium, onUpgrade }) => {
 
                         <div className="space-y-3 overflow-y-auto pr-2 custom-scrollbar pb-4 flex-1">
                             {visibleLines.length > 0 ? (
-                                visibleLines.map((line, idx) => {
+                                visibleLines.map((line: string, idx: number) => {
                                     const isCopied = copiedIndex?.catId === cat.id && copiedIndex?.lineIdx === idx;
                                     return (
                                         <div 
