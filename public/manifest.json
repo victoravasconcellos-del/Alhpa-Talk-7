@@ -10,13 +10,13 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "https://ui-avatars.com/api/?name=A&background=000000&color=F59E0B&size=192&font-size=0.6&length=1&bold=true",
+      "src": "https://ui-avatars.com/api/?name=A&background=000000&color=F59E0B&size=192&font-size=0.6&length=1&bold=true&v=2",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "https://ui-avatars.com/api/?name=A&background=000000&color=F59E0B&size=512&font-size=0.6&length=1&bold=true",
+      "src": "https://ui-avatars.com/api/?name=A&background=000000&color=F59E0B&size=512&font-size=0.6&length=1&bold=true&v=2",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
