@@ -37,6 +37,7 @@ const Library: React.FC<LibraryProps> = ({ isPremium, onUpgrade }) => {
         {categories.map((cat: any) => {
             const searchTerm = searchTerms[cat.id] || '';
             const allLines = cat.lines;
+            
             const filteredLines = allLines.filter((line: string) => 
                 line.toLowerCase().includes(searchTerm.toLowerCase())
             );
