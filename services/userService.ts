@@ -85,3 +85,4 @@ export const getStoredQuests = async (userId: string) => {
 export const saveStoredQuests = async (userId: string, quests: DailyQuest[], date: string) => {
     await supabase.from('profiles').update({ quests, quests_date: date }).eq('id', userId);
 }
+
