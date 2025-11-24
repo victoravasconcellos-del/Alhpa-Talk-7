@@ -1,62 +1,34 @@
-import { GoogleGenAI, Type } from "@google/genai";
-import { supabase } from '../lib/supabase';
+import { GoogleGenAI } from "@google/genai";
 import { MessageAnalysis, CoachingRequest, DailyQuest } from '../types';
 
-const getLocalAiClient = () => {
-  const apiKey = process.env.API_KEY;
-  if (!apiKey) return new GoogleGenAI({ apiKey: 'dummy' }); // Fallback to avoid crash
-  return new GoogleGenAI({ apiKey });
+const getClient = () => new GoogleGenAI({ apiKey: process.env.API_KEY || 'dummy' });
+
+export const analyzeScreenshot = async (base64: string): Promise<MessageAnalysis> => {
+  try {
+    const ai = getClient();
+    const res = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: { parts: [{ inlineData: { mimeType: 'image/png', data: base64 } }, { text: "Analise." }] }
+    });
+    return JSON.parse(res.text || '{}') as MessageAnalysis;
+  } catch (e) { throw new Error("Erro na IA"); }
 };
 
-const SYSTEM_INSTRUCTION = "Você é o AlphaBot, um coach de relacionamentos.";
-
-export const analyzeScreenshot = async (base64Image: string): Promise<MessageAnalysis> => {
+export const getCoachingAdvice = async (req: CoachingRequest): Promise<string> => {
   try {
-    const ai = getLocalAiClient();
-    const response = await ai.models.generateContent({
+    const ai = getClient();
+    const res = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
-      contents: {
-        parts: [{ inlineData: { mimeType: 'image/png', data: base64Image } }, { text: "Analise este print." }]
-      },
-      config: {
-        systemInstruction: SYSTEM_INSTRUCTION,
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            confidenceScore: { type: Type.NUMBER },
-            subtext: { type: Type.STRING },
-            feedback: { type: Type.STRING },
-            suggestedReplies: { type: Type.ARRAY, items: { type: Type.STRING } }
-          }
-        }
-      }
+      contents: `Ajude: ${req.text} Objetivo: ${req.goal}`
     });
-    if (response.text) return JSON.parse(response.text) as MessageAnalysis;
-    throw new Error("EMPTY");
-  } catch (error) {
-    throw new Error("Erro na análise.");
-  }
-};
-
-export const getCoachingAdvice = async (request: CoachingRequest): Promise<string> => {
-  try {
-    const ai = getLocalAiClient();
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: `Ajuda: ${request.text} Objetivo: ${request.goal}`,
-      config: { systemInstruction: SYSTEM_INSTRUCTION }
-    });
-    return response.text || "Erro.";
-  } catch (error) {
-    return "Erro de conexão.";
-  }
+    return res.text || "Erro";
+  } catch (e) { return "Erro de conexão"; }
 };
 
 export const getDailyQuests = async (): Promise<DailyQuest[]> => {
   return [
-      { id: '1', title: 'Use o Scanner IA', xpReward: 50, difficulty: 'EASY', completed: false },
-      { id: '2', title: 'Acesse a Biblioteca', xpReward: 20, difficulty: 'EASY', completed: false },
-      { id: '3', title: 'Use o Coach', xpReward: 50, difficulty: 'MEDIUM', completed: false }
+      { id: '1', title: 'Teste 1', xpReward: 10, difficulty: 'EASY', completed: false },
+      { id: '2', title: 'Teste 2', xpReward: 20, difficulty: 'MEDIUM', completed: false },
+      { id: '3', title: 'Teste 3', xpReward: 30, difficulty: 'HARD', completed: false }
   ];
-}
+};
