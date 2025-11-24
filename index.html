@@ -17,7 +17,10 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="AlphaTalk">
     
-    <!-- Caminho relativo para o manifest (sem a barra inicial) -->
+    <!-- Ícone para iOS (Obrigatório para Fullscreen funcionar corretamente) -->
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3062/3062634.png">
+    
+    <!-- Caminho para o manifest (O Vite serve arquivos de /public na raiz) -->
     <link rel="manifest" href="manifest.json">
 
     <!-- Tailwind CSS via CDN -->
@@ -40,11 +43,31 @@
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap');
       
+      /* Trava Nuclear para iOS: Impede o efeito elástico que revela a barra de endereço */
+      html {
+        height: 100%;
+        width: 100%;
+        overflow: hidden;
+        background-color: #000000;
+      }
+
       body {
+        height: 100%;
+        width: 100%;
+        overflow: hidden;
+        position: fixed; /* Fixa o corpo para impedir scroll da viewport */
         background-color: #000000;
         color: #ffffff;
         overscroll-behavior: none;
-        /* Evita o bounce elástico no iOS */
+        -webkit-font-smoothing: antialiased;
+      }
+
+      /* O scroll acontece apenas dentro do App */
+      #root {
+        height: 100%;
+        width: 100%;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch; /* Scroll nativo suave no iOS */
       }
 
       /* Custom Scrollbar */
