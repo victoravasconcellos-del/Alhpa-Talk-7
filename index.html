@@ -17,7 +17,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="AlphaTalk">
     
-    <link rel="manifest" href="/manifest.json">
+    <!-- Caminho relativo para o manifest (sem a barra inicial) -->
+    <link rel="manifest" href="manifest.json">
 
     <!-- Tailwind CSS via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -43,6 +44,7 @@
         background-color: #000000;
         color: #ffffff;
         overscroll-behavior: none;
+        /* Evita o bounce elástico no iOS */
       }
 
       /* Custom Scrollbar */
@@ -74,8 +76,12 @@
         -webkit-backdrop-filter: blur(12px);
       }
 
+      /* Safe Area Utilities for iPhone Notch */
       .pb-safe {
         padding-bottom: env(safe-area-inset-bottom);
+      }
+      .pt-safe {
+        padding-top: env(safe-area-inset-top);
       }
 
       /* Animations */
