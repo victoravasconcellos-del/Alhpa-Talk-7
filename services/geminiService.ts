@@ -2,6 +2,7 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { supabase } from '../lib/supabase';
 import { MessageAnalysis, CoachingRequest, DailyQuest } from '../types';
 
+// Helper to get initialized client safely (Client-side Fallback)
 const getLocalAiClient = () => {
   const apiKey = process.env.API_KEY;
   if (!apiKey) {
