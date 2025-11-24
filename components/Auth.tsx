@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { createUserProfile } from '../services/userService';
-import { Lock, Mail, User, ArrowRight, AlertCircle, Loader2, X, WifiOff } from 'lucide-react';
+import { Lock, Mail, User, ArrowRight, AlertCircle, Loader2, X, WifiOff, CheckCircle } from 'lucide-react';
 
 type AuthMode = 'LOGIN' | 'REGISTER' | 'RECOVERY';
 
@@ -46,42 +46,38 @@ const Auth: React.FC = () => {
 
     setLoading(true);
 
-    // Timeout de segurança para evitar loop infinito de loading
-    const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error("TIMEOUT")), 15000)
-    );
-
     try {
       if (authMode === 'RECOVERY') {
-        await Promise.race([
-            supabase.auth.resetPasswordForEmail(email, {
-                redirectTo: window.location.origin + '/login',
-            }),
-            timeoutPromise
-        ]);
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: window.location.origin + '/login',
+        });
+        if (error) throw error;
         setInfoMessage("E-mail de recuperação enviado! Verifique sua caixa de entrada.");
+        setLoading(false);
       } else if (authMode === 'LOGIN') {
-        const { error } = await Promise.race([
-            supabase.auth.signInWithPassword({ email, password }),
-            timeoutPromise
-        ]) as any;
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
         if (error) throw error;
         
-        // Sucesso no login - Navegação
-        console.log("Login successful, redirecting...");
-        navigate('/app');
+        // Verifica se o usuário realmente foi logado
+        if (data?.session) {
+             setInfoMessage("Sucesso! Entrando no sistema...");
+             
+             // Pequeno delay para garantir que o AuthContext receba o evento de mudança de sessão
+             setTimeout(() => {
+                 navigate('/app');
+             }, 800); 
+        } else {
+             throw new Error("Não foi possível iniciar a sessão. Tente novamente.");
+        }
         
       } else {
         // REGISTER
-        const { data, error } = await Promise.race([
-            supabase.auth.signUp({
-                email,
-                password,
-                options: { data: { name: name || 'Agente' } }
-            }),
-            timeoutPromise
-        ]) as any;
+        const { data, error } = await supabase.auth.signUp({
+            email,
+            password,
+            options: { data: { name: name || 'Agente' } }
+        });
         
         if (error) throw error;
         
@@ -92,15 +88,19 @@ const Auth: React.FC = () => {
            } catch (profileError) {
              console.error("Profile creation warning:", profileError);
            }
-           navigate('/app');
+           setInfoMessage("Conta criada! Acessando...");
+           setTimeout(() => {
+               navigate('/app');
+           }, 800);
         } else if (data.user && !data.session) {
             setInfoMessage("Conta criada com sucesso! Verifique seu e-mail para confirmar antes de entrar.");
             setAuthMode('LOGIN');
-            return; // Retorna para não setar loading false imediatamente
+            setLoading(false);
         }
       }
     } catch (err: any) {
       console.error("Auth Error Full:", err);
+      setLoading(false);
       
       let msg = "Erro de autenticação.";
       
@@ -117,8 +117,6 @@ const Auth: React.FC = () => {
       }
       
       setError(msg);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -158,7 +156,7 @@ const Auth: React.FC = () => {
             <p className="text-zinc-500 text-xs font-bold uppercase tracking-[0.3em] mt-2">Área de Membros</p>
         </div>
 
-        <div className="glass-card p-8 rounded-3xl border border-zinc-800 shadow-2xl w-full mb-6 relative overflow-hidden">
+        <div className="glass-card p-8 rounded-3xl border border-zinc-800 shadow-2xl w-full mb-6 relative overflow-hidden animate-slide-up">
              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-1 bg-gradient-to-r from-transparent via-yellow-500 to-transparent"></div>
 
             <h2 className="text-2xl font-bold text-white mb-6 text-center">
@@ -168,9 +166,9 @@ const Auth: React.FC = () => {
             </h2>
             
             {infoMessage && (
-                <div className="bg-blue-900/20 border border-blue-500/30 p-4 rounded-xl flex items-start gap-3 mb-6 text-blue-300 text-sm animate-in fade-in slide-in-from-top-2">
-                    <AlertCircle size={20} className="mt-0.5 flex-shrink-0" />
-                    <span className="leading-relaxed">{infoMessage}</span>
+                <div className="bg-green-900/20 border border-green-500/30 p-4 rounded-xl flex items-start gap-3 mb-6 text-green-300 text-sm animate-in fade-in slide-in-from-top-2">
+                    {infoMessage.includes("Sucesso") ? <CheckCircle size={20} className="mt-0.5" /> : <AlertCircle size={20} className="mt-0.5" />}
+                    <span className="leading-relaxed font-bold">{infoMessage}</span>
                 </div>
             )}
 
