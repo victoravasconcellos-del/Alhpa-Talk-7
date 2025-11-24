@@ -1,4 +1,4 @@
-// Force Update - App Component
+// BUILD VERSION: FINAL-FIX-V2
 import React, { useState, useEffect } from 'react';
 import Navigation from './components/Navigation';
 import Dashboard from './components/Dashboard';
@@ -8,7 +8,6 @@ import Library from './components/Library';
 import Premium from './components/Premium';
 import Auth from './components/Auth';
 import ProfileSettings from './components/ProfileSettings';
-import Onboarding from './components/Onboarding';
 import { AppView, UserStats } from './types';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { getUserProfile, updateUserStats, INITIAL_STATS, createUserProfile, incrementUsage } from './services/userService';
@@ -114,7 +113,6 @@ const AuthenticatedApp: React.FC = () => {
   const [currentView, setCurrentView] = useState<AppView>(AppView.DASHBOARD);
   const [stats, setStats] = useState<UserStats>(INITIAL_STATS);
   const [showLevelUp, setShowLevelUp] = useState(false);
-  const [showOnboarding, setShowOnboarding] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
   const [dbError, setDbError] = useState(false);
   
@@ -125,19 +123,16 @@ const AuthenticatedApp: React.FC = () => {
       if (user) {
         setLoadingData(true);
         try {
-            const hasSeenIntro = localStorage.getItem(`alpha_intro_${user.id}`);
-            if (!hasSeenIntro) {
-                setShowOnboarding(true);
-            }
-
             const profile = await getUserProfile(user.id);
             if (profile) {
                 setStats(profile);
             } else {
+                // Lazy create if not exists
                 const name = user.user_metadata?.name || 'Agente';
                 await createUserProfile(user.id, user.email!, name);
+                
+                // Set initial stats locally
                 setStats({ ...INITIAL_STATS, name });
-                if (!hasSeenIntro) setShowOnboarding(true); 
             }
         } catch (err: any) {
             console.error("Failed to load user data", err);
@@ -152,13 +147,6 @@ const AuthenticatedApp: React.FC = () => {
     loadUserData();
   }, [user]);
 
-  const handleFinishOnboarding = () => {
-      if (user) {
-        localStorage.setItem(`alpha_intro_${user.id}`, 'true');
-        setShowOnboarding(false);
-      }
-  };
-
   const saveStatsToDb = async (newStats: UserStats) => {
     if (user && !dbError) {
         await updateUserStats(user.id, newStats);
@@ -172,6 +160,7 @@ const AuthenticatedApp: React.FC = () => {
         let newMaxXp = prev.maxXp;
         let leveledUp = false;
 
+        // Level Up Logic
         if (newXp >= prev.maxXp) {
             newXp = newXp - prev.maxXp;
             newLevel++;
@@ -205,6 +194,7 @@ const AuthenticatedApp: React.FC = () => {
     addXp(xp);
   };
 
+  // Usage Handlers for Freemium Logic
   const handleScanUsed = () => {
       if (user) {
           incrementUsage(user.id, 'scan', stats.dailyScans);
@@ -235,10 +225,6 @@ const AuthenticatedApp: React.FC = () => {
 
   if (!user) {
       return <Auth />;
-  }
-
-  if (showOnboarding) {
-      return <Onboarding onFinish={handleFinishOnboarding} />;
   }
 
   const renderView = () => {
@@ -286,6 +272,7 @@ const AuthenticatedApp: React.FC = () => {
       case AppView.PROFILE:
         return (
             <div className="flex flex-col items-center justify-center h-[70vh] text-zinc-500 animate-slide-up relative">
+                {/* Settings Button */}
                 <button 
                     onClick={() => setCurrentView(AppView.SETTINGS)}
                     className="absolute top-0 right-4 p-2 bg-zinc-900 border border-zinc-800 rounded-lg text-zinc-400 hover:text-alpha-gold hover:border-alpha-gold transition-all"
