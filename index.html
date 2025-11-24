@@ -17,11 +17,14 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="AlphaTalk">
     
-    <!-- Ícone para iOS (Obrigatório para Fullscreen funcionar corretamente) -->
-    <link rel="apple-touch-icon" href="https://ui-avatars.com/api/?name=A&background=000000&color=F59E0B&size=512&font-size=0.6&length=1&bold=true">
+    <!-- Favicon Padrão -->
+    <link rel="icon" type="image/png" href="https://ui-avatars.com/api/?name=A&background=000000&color=F59E0B&size=32&font-size=0.6&length=1&bold=true&v=2">
     
-    <!-- Caminho para o manifest (O Vite serve arquivos de /public na raiz) -->
-    <link rel="manifest" href="manifest.json">
+    <!-- Ícone para iOS (Obrigatório para Fullscreen funcionar corretamente) - Com Versionamento para limpar cache -->
+    <link rel="apple-touch-icon" href="https://ui-avatars.com/api/?name=A&background=000000&color=F59E0B&size=512&font-size=0.6&length=1&bold=true&v=2">
+    
+    <!-- Caminho para o manifest (O Vite serve arquivos de /public na raiz) - Com Versionamento -->
+    <link rel="manifest" href="manifest.json?v=2">
 
     <!-- Tailwind CSS via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
