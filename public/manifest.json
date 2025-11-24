@@ -10,13 +10,13 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/3062/3062634.png",
+      "src": "https://ui-avatars.com/api/?name=A&background=000000&color=F59E0B&size=192&font-size=0.6&length=1&bold=true",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/3062/3062634.png",
+      "src": "https://ui-avatars.com/api/?name=A&background=000000&color=F59E0B&size=512&font-size=0.6&length=1&bold=true",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
