@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { createUserProfile } from '../services/userService';
-import { Lock, Mail, User, ArrowRight, AlertCircle, Loader2, Shield, FileText, X } from 'lucide-react';
+import { Lock, Mail, User, ArrowRight, AlertCircle, Loader2, X, WifiOff } from 'lucide-react';
 
 type AuthMode = 'LOGIN' | 'REGISTER' | 'RECOVERY';
 
 const Auth: React.FC = () => {
+  const navigate = useNavigate();
   const [authMode, setAuthMode] = useState<AuthMode>('LOGIN');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -16,50 +18,105 @@ const Auth: React.FC = () => {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
 
+  const isValidEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError(null);
     setInfoMessage(null);
 
+    // Validação básica
+    if (!email || !password) {
+        setError("Preencha todos os campos.");
+        return;
+    }
+
+    if (!isValidEmail(email)) {
+        setError("Por favor, insira um endereço de e-mail válido.");
+        return;
+    }
+
+    if (authMode === 'REGISTER' && !name) {
+        setError("Por favor, informe um nome.");
+        return;
+    }
+
+    setLoading(true);
+
+    // Timeout de segurança para evitar loop infinito de loading
+    const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error("TIMEOUT")), 15000)
+    );
+
     try {
       if (authMode === 'RECOVERY') {
-        const { error } = await supabase.auth.resetPasswordForEmail(email, {
-            redirectTo: window.location.origin,
-        });
-        if (error) throw error;
+        await Promise.race([
+            supabase.auth.resetPasswordForEmail(email, {
+                redirectTo: window.location.origin + '/login',
+            }),
+            timeoutPromise
+        ]);
         setInfoMessage("E-mail de recuperação enviado! Verifique sua caixa de entrada.");
       } else if (authMode === 'LOGIN') {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
+        const { error } = await Promise.race([
+            supabase.auth.signInWithPassword({ email, password }),
+            timeoutPromise
+        ]) as any;
+
         if (error) throw error;
+        
+        // Sucesso no login - Navegação
+        console.log("Login successful, redirecting...");
+        navigate('/app');
+        
       } else {
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: { data: { name: name || 'Agente' } }
-        });
+        // REGISTER
+        const { data, error } = await Promise.race([
+            supabase.auth.signUp({
+                email,
+                password,
+                options: { data: { name: name || 'Agente' } }
+            }),
+            timeoutPromise
+        ]) as any;
         
         if (error) throw error;
         
         if (data.session && data.user) {
-           await createUserProfile(data.user.id, email, name || 'Agente');
+           // Criação de perfil pode falhar sem impedir o login, então fazemos separadamente
+           try {
+             await createUserProfile(data.user.id, email, name || 'Agente');
+           } catch (profileError) {
+             console.error("Profile creation warning:", profileError);
+           }
+           navigate('/app');
         } else if (data.user && !data.session) {
-            setInfoMessage("Conta criada! Verifique seu e-mail.");
+            setInfoMessage("Conta criada com sucesso! Verifique seu e-mail para confirmar antes de entrar.");
             setAuthMode('LOGIN');
-            return;
+            return; // Retorna para não setar loading false imediatamente
         }
       }
     } catch (err: any) {
-      console.error("Auth Error:", err);
-      // Mensagem mais amigável para o erro "Failed to fetch"
-      if (err.message === 'Failed to fetch') {
-          setError("Erro de conexão. Verifique sua internet ou se as chaves do Supabase estão configuradas.");
-      } else {
-          setError(err.message || "Ocorreu um erro. Tente novamente.");
+      console.error("Auth Error Full:", err);
+      
+      let msg = "Erro de autenticação.";
+      
+      if (err.message === "TIMEOUT") {
+          msg = "O servidor demorou para responder. Verifique sua conexão.";
+      } else if (err.message === 'Failed to fetch') {
+          msg = "Erro de conexão. Verifique se você está conectado à internet.";
+      } else if (err.message?.includes("Invalid login credentials")) {
+          msg = "E-mail ou senha incorretos.";
+      } else if (err.message?.includes("User already registered")) {
+          msg = "Este e-mail já está cadastrado.";
+      } else if (err.message) {
+          msg = err.message;
       }
+      
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -74,26 +131,23 @@ const Auth: React.FC = () => {
   return (
     <div className="min-h-screen w-full bg-black flex flex-col relative overflow-y-auto p-4 items-center justify-center">
       
-      {/* Modal Legal */}
       {legalModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/95 backdrop-blur-sm" onClick={() => setLegalModal(null)}>
             <div className="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-md p-6 relative" onClick={(e) => e.stopPropagation()}>
-                <button onClick={() => setLegalModal(null)} className="absolute top-4 right-4 text-zinc-500"><X size={20}/></button>
+                <button onClick={() => setLegalModal(null)} className="absolute top-4 right-4 text-zinc-500 hover:text-white"><X size={20}/></button>
                 <h3 className="text-lg font-bold text-white mb-4">{legalModal === 'TERMS' ? 'Termos de Uso' : 'Política de Privacidade'}</h3>
-                <div className="text-zinc-400 text-sm space-y-2 max-h-60 overflow-y-auto">
-                    <p>O AlphaTalk utiliza inteligência artificial para gerar sugestões. As respostas são para fins de entretenimento.</p>
-                    <p>Não nos responsabilizamos pelas interações resultantes do uso do aplicativo.</p>
-                    <p>Seus dados de login são processados de forma segura.</p>
+                <div className="text-zinc-400 text-sm space-y-2 max-h-60 overflow-y-auto custom-scrollbar pr-2">
+                    <p>1. O AlphaTalk utiliza inteligência artificial para gerar sugestões. Não garantimos resultados reais em relacionamentos.</p>
+                    <p>2. Seus dados são processados de forma anônima.</p>
+                    <p>3. O uso indevido da plataforma resultará em banimento.</p>
                 </div>
-                <button onClick={() => setLegalModal(null)} className="w-full bg-white text-black font-bold py-2 rounded mt-4">Entendi</button>
+                <button onClick={() => setLegalModal(null)} className="w-full bg-white text-black font-bold py-3 rounded-xl mt-6 hover:bg-zinc-200">Entendi</button>
             </div>
         </div>
       )}
 
-      <div className="flex-1 flex flex-col items-center justify-center w-full max-w-md z-10">
-        
-        {/* LOGO - Usando cores padrão yellow-600 para garantir visibilidade */}
-        <div className="text-center mb-8 w-full">
+      <div className="flex-1 flex flex-col items-center justify-center w-full max-w-md z-10 py-10">
+        <div className="text-center mb-8 w-full cursor-pointer" onClick={() => navigate('/')}>
             <div className="w-20 h-20 bg-gradient-to-br from-yellow-500 to-orange-700 rounded-2xl flex items-center justify-center shadow-[0_0_30px_rgba(245,158,11,0.4)] mx-auto mb-6 relative overflow-hidden group">
                 <span className="text-5xl font-black text-black relative z-10">A</span>
                 <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
@@ -101,81 +155,81 @@ const Auth: React.FC = () => {
             <h1 className="text-4xl font-black text-white italic tracking-tighter">
                 ALPHA <span className="text-yellow-500">TALK</span>
             </h1>
-            <p className="text-zinc-500 text-xs font-bold uppercase tracking-[0.3em] mt-2">Acesso Restrito</p>
+            <p className="text-zinc-500 text-xs font-bold uppercase tracking-[0.3em] mt-2">Área de Membros</p>
         </div>
 
-        <div className="glass-card p-8 rounded-3xl border border-zinc-800 shadow-2xl w-full mb-6 relative">
+        <div className="glass-card p-8 rounded-3xl border border-zinc-800 shadow-2xl w-full mb-6 relative overflow-hidden">
              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-1 bg-gradient-to-r from-transparent via-yellow-500 to-transparent"></div>
 
-            <h2 className="text-2xl font-bold text-white mb-2 text-center">
-                {authMode === 'LOGIN' && 'Entrar'}
-                {authMode === 'REGISTER' && 'Criar Conta'}
-                {authMode === 'RECOVERY' && 'Recuperar'}
+            <h2 className="text-2xl font-bold text-white mb-6 text-center">
+                {authMode === 'LOGIN' && 'Acessar Conta'}
+                {authMode === 'REGISTER' && 'Criar Nova Conta'}
+                {authMode === 'RECOVERY' && 'Recuperar Senha'}
             </h2>
             
             {infoMessage && (
-                <div className="bg-blue-900/30 border border-blue-800 p-3 rounded-xl flex items-start gap-2 mb-4 text-blue-300 text-sm">
-                    <AlertCircle size={16} className="mt-0.5 flex-shrink-0" />
-                    <span>{infoMessage}</span>
+                <div className="bg-blue-900/20 border border-blue-500/30 p-4 rounded-xl flex items-start gap-3 mb-6 text-blue-300 text-sm animate-in fade-in slide-in-from-top-2">
+                    <AlertCircle size={20} className="mt-0.5 flex-shrink-0" />
+                    <span className="leading-relaxed">{infoMessage}</span>
                 </div>
             )}
 
             {error && (
-                <div className="bg-red-900/30 border border-red-800 p-3 rounded-xl flex items-start gap-2 mb-4 text-red-300 text-sm">
-                    <AlertCircle size={16} className="mt-0.5 flex-shrink-0" />
-                    <span>{error}</span>
+                <div className="bg-red-900/20 border border-red-500/30 p-4 rounded-xl flex items-start gap-3 mb-6 text-red-300 text-sm animate-in fade-in slide-in-from-top-2">
+                    <WifiOff size={20} className="mt-0.5 flex-shrink-0" />
+                    <span className="leading-relaxed">{error}</span>
                 </div>
             )}
 
             <form onSubmit={handleAuth} className="space-y-4">
                 {authMode === 'REGISTER' && (
-                    <div className="relative">
-                        <User className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" size={20} />
+                    <div className="relative group">
+                        <User className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-yellow-500 transition-colors" size={20} />
                         <input 
                             type="text" 
-                            placeholder="Nome"
+                            placeholder="Seu Nome ou Codinome"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
-                            className="w-full bg-black/50 border border-zinc-800 rounded-xl py-4 pl-12 pr-4 text-white focus:border-yellow-500 outline-none"
-                            required
+                            className="w-full bg-black/50 border border-zinc-800 rounded-xl py-4 pl-12 pr-4 text-white focus:border-yellow-500 outline-none transition-all placeholder:text-zinc-600"
+                            disabled={loading}
                         />
                     </div>
                 )}
 
-                <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" size={20} />
+                <div className="relative group">
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-yellow-500 transition-colors" size={20} />
                     <input 
                         type="email" 
-                        placeholder="E-mail"
+                        placeholder="Seu E-mail"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full bg-black/50 border border-zinc-800 rounded-xl py-4 pl-12 pr-4 text-white focus:border-yellow-500 outline-none"
-                        required
+                        className="w-full bg-black/50 border border-zinc-800 rounded-xl py-4 pl-12 pr-4 text-white focus:border-yellow-500 outline-none transition-all placeholder:text-zinc-600"
+                        disabled={loading}
                     />
                 </div>
 
                 {authMode !== 'RECOVERY' && (
-                    <div className="relative">
-                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" size={20} />
+                    <div className="relative group">
+                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-yellow-500 transition-colors" size={20} />
                         <input 
                             type="password" 
-                            placeholder="Senha"
+                            placeholder="Sua Senha"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="w-full bg-black/50 border border-zinc-800 rounded-xl py-4 pl-12 pr-4 text-white focus:border-yellow-500 outline-none"
-                            required
+                            className="w-full bg-black/50 border border-zinc-800 rounded-xl py-4 pl-12 pr-4 text-white focus:border-yellow-500 outline-none transition-all placeholder:text-zinc-600"
+                            disabled={loading}
                         />
                     </div>
                 )}
 
                 {authMode === 'LOGIN' && (
-                    <div className="flex justify-end">
+                    <div className="flex justify-end pt-1">
                         <button 
                             type="button"
                             onClick={() => switchMode('RECOVERY')}
-                            className="text-xs text-zinc-500 hover:text-yellow-500 transition-colors"
+                            className="text-xs font-bold text-zinc-500 hover:text-yellow-500 transition-colors"
                         >
-                            Esqueci a senha
+                            Esqueci minha senha
                         </button>
                     </div>
                 )}
@@ -183,30 +237,35 @@ const Auth: React.FC = () => {
                 <button 
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-yellow-600 text-black font-bold uppercase tracking-wider py-4 rounded-xl hover:bg-yellow-500 transition-colors flex items-center justify-center gap-2 mt-4"
+                    className="w-full bg-gradient-to-r from-alpha-gold to-yellow-600 text-black font-black uppercase tracking-wider py-4 rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 mt-6 disabled:opacity-50 disabled:grayscale shadow-[0_0_20px_rgba(245,158,11,0.2)]"
                 >
-                    {loading ? <Loader2 className="animate-spin" size={20} /> : (
+                    {loading ? (
                         <>
-                            {authMode === 'LOGIN' && 'Acessar'}
-                            {authMode === 'REGISTER' && 'Cadastrar'}
-                            {authMode === 'RECOVERY' && 'Enviar'}
-                            {!loading && authMode !== 'RECOVERY' && <ArrowRight size={20} />}
+                            <Loader2 className="animate-spin" size={20} />
+                            <span>Processando...</span>
+                        </>
+                    ) : (
+                        <>
+                            {authMode === 'LOGIN' && 'Entrar no Sistema'}
+                            {authMode === 'REGISTER' && 'Finalizar Cadastro'}
+                            {authMode === 'RECOVERY' && 'Enviar Link'}
+                            {authMode !== 'RECOVERY' && <ArrowRight size={20} />}
                         </>
                     )}
                 </button>
             </form>
 
-            <div className="mt-6 text-center">
+            <div className="mt-8 pt-6 border-t border-zinc-800 text-center">
                 {authMode === 'RECOVERY' ? (
-                    <button onClick={() => switchMode('LOGIN')} className="text-zinc-500 text-sm hover:text-white">Voltar</button>
+                    <button onClick={() => switchMode('LOGIN')} className="text-zinc-500 text-sm font-bold hover:text-white transition-colors">Voltar para Login</button>
                 ) : (
                     <p className="text-zinc-500 text-sm">
-                        {authMode === 'LOGIN' ? 'Não tem conta?' : 'Já tem conta?'}
+                        {authMode === 'LOGIN' ? 'Ainda não é membro?' : 'Já tem uma conta?'}
                         <button 
                             onClick={() => switchMode(authMode === 'LOGIN' ? 'REGISTER' : 'LOGIN')}
                             className="text-yellow-500 font-bold ml-2 hover:underline"
                         >
-                            {authMode === 'LOGIN' ? 'Criar Agora' : 'Entrar'}
+                            {authMode === 'LOGIN' ? 'Criar Conta Grátis' : 'Fazer Login'}
                         </button>
                     </p>
                 )}
@@ -214,10 +273,10 @@ const Auth: React.FC = () => {
         </div>
       </div>
 
-      <footer className="w-full py-6 flex justify-center gap-6 text-[10px] uppercase font-bold tracking-widest text-zinc-600">
-        <button onClick={() => setLegalModal('TERMS')} className="hover:text-white">Termos</button>
+      <footer className="w-full py-4 flex justify-center gap-6 text-[10px] uppercase font-bold tracking-widest text-zinc-700">
+        <button onClick={() => setLegalModal('TERMS')} className="hover:text-zinc-400 transition-colors">Termos de Uso</button>
         <span>•</span>
-        <button onClick={() => setLegalModal('PRIVACY')} className="hover:text-white">Privacidade</button>
+        <button onClick={() => setLegalModal('PRIVACY')} className="hover:text-zinc-400 transition-colors">Privacidade</button>
       </footer>
     </div>
   );
