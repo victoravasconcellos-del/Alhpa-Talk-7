@@ -126,7 +126,7 @@ const AuthenticatedApp: React.FC = () => {
         {currentView === AppView.ANALYZER && <ChatAnalyzer onAnalysisComplete={handleScanUsed} usageCount={stats.dailyScans} isPremium={stats.isPremium} onUpgrade={() => setCurrentView(AppView.PREMIUM)} />}
         {currentView === AppView.COACH && <MessageCoach onUsage={handleCoachUsed} usageCount={stats.dailyCoachUses} isPremium={stats.isPremium} onUpgrade={() => setCurrentView(AppView.PREMIUM)} />}
         {currentView === AppView.LIBRARY && <Library isPremium={stats.isPremium} onUpgrade={() => setCurrentView(AppView.PREMIUM)} />}
-        {currentView === AppView.PREMIUM && <Premium />}
+        {currentView === AppView.PREMIUM && <Premium isPremium={stats.isPremium} />}
         {currentView === AppView.SETTINGS && <ProfileSettings stats={stats} onSave={handleUpdateProfile} onBack={() => setCurrentView(AppView.PROFILE)} />}
         {currentView === AppView.PROFILE && (
             <div className="flex flex-col items-center justify-center h-[70vh] text-zinc-500 animate-slide-up relative">
