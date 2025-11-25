@@ -34,33 +34,52 @@ export const getUserProfile = async (userId: string): Promise<UserStats | null> 
     return null;
   }
 
-  // Check if we need to reset daily limits (new day)
+  // Current Date (YYYY-MM-DD)
   const today = new Date().toISOString().split('T')[0];
+  const lastUsageDate = data.usage_date || today;
+
   let currentStats: UserStats = {
     level: data.level,
     xp: data.xp,
     maxXp: data.max_xp,
-    streak: data.streak,
+    streak: data.streak || 1,
     tokens: data.tokens,
     isPremium: data.is_premium,
     name: data.name,
     avatarUrl: data.avatar_url,
     dailyScans: data.daily_scans || 0,
     dailyCoachUses: data.daily_coach_uses || 0,
-    usageDate: data.usage_date || today
+    usageDate: lastUsageDate
   };
 
-  if (currentStats.usageDate !== today) {
-    // Reset limits for new day
+  // Lógica de Atualização Diária (Streak e Limites)
+  if (lastUsageDate !== today) {
+    // Calcular a diferença em dias para atualizar o Streak
+    const d1 = new Date(lastUsageDate);
+    const d2 = new Date(today);
+    const diffTime = Math.abs(d2.getTime() - d1.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 1) {
+        // Logou em dias consecutivos: Aumenta o Streak
+        currentStats.streak += 1;
+    } else if (diffDays > 1) {
+        // Pulou um dia ou mais: Reseta o Streak
+        currentStats.streak = 1;
+    }
+    // Se diffDays for 0 (mesmo dia), não muda o streak (já tratado pelo if inicial)
+
+    // Resetar limites diários
     currentStats.dailyScans = 0;
     currentStats.dailyCoachUses = 0;
     currentStats.usageDate = today;
     
-    // Fire and forget update
+    // Atualizar no Banco de Dados
     await updateUserStats(userId, {
         dailyScans: 0,
         dailyCoachUses: 0,
-        usageDate: today
+        usageDate: today,
+        streak: currentStats.streak
     });
   }
 
@@ -110,6 +129,9 @@ export const updateUserStats = async (userId: string, stats: Partial<UserStats>)
   if (stats.dailyScans !== undefined) dbUpdates.daily_scans = stats.dailyScans;
   if (stats.dailyCoachUses !== undefined) dbUpdates.daily_coach_uses = stats.dailyCoachUses;
   if (stats.usageDate !== undefined) dbUpdates.usage_date = stats.usageDate;
+
+  // Always update last_active on explicit stats update
+  dbUpdates.last_active = new Date().toISOString();
 
   const { error } = await supabase
     .from('profiles')
