@@ -135,7 +135,7 @@ const MessageCoach: React.FC<MessageCoachProps> = ({ onUsage, usageCount, isPrem
                                 components={{
                                     strong: ({node, ...props}) => <span className="text-alpha-gold font-bold font-mono text-xs uppercase tracking-wider bg-alpha-gold/10 px-1 rounded" {...props} />,
                                     ul: ({node, ...props}) => <ul className="space-y-3 my-3" {...props} />,
-                                    li: ({node, ...props}) => <li className="flex gap-3 text-zinc-400" {...props}><span className="text-zinc-600 mt-1.5 select-none text-[8px]">></span><span className="leading-relaxed">{props.children}</span></li>,
+                                    li: ({node, ...props}) => <li className="flex gap-3 text-zinc-400" {...props}><span className="text-zinc-600 mt-1.5 select-none text-[8px]">&gt;</span><span className="leading-relaxed">{props.children}</span></li>,
                                     p: ({node, ...props}) => <p className="mb-3 last:mb-0 leading-relaxed" {...props} />
                                 }}
                             >
